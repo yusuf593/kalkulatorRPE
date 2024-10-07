@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RPE Calculator</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>RPE Calculator</h1>
+        <div class="calculator">
+            <div class="section">
+                <h2>Have</h2>
+                <div class="input-group">
+                    <label for="weight">Weight</label>
+                    <input type="number" id="weight" step="0.1">
+                </div>
+                <div class="input-group">
+                    <label for="reps">Reps</label>
+                    <input type="number" id="reps">
+                </div>
+                <div class="input-group">
+                    <label for="rpe">RPE</label>
+                    <input type="number" id="rpe" step="0.5" min="1" max="10">
+                </div>
+                <div class="input-group">
+                    <label for="e1rm">E1RM</label>
+                    <input type="number" id="e1rm" readonly>
+                </div>
+            </div>
+            <div class="section">
+                <h2>Want</h2>
+                <div class="input-group">
+                    <label for="want-reps">Reps</label>
+                    <input type="number" id="want-reps">
+                </div>
+                <div class="input-group">
+                    <label for="want-rpe">RPE</label>
+                    <input type="number" id="want-rpe" step="0.5" min="1" max="10">
+                </div>
+                <div class="input-group">
+                    <label for="want-weight">Weight</label>
+                    <input type="number" id="want-weight" readonly>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tabel persentase berdasarkan Reps dan RPE
+        const rpeTable = {
+            1: {10: 1.00, 9.5: 0.98, 9: 0.96, 8.5: 0.94, 8: 0.92, 7.5: 0.91, 7: 0.89, 6.5: 0.88, 6: 0.86, 5.5: 0.84, 5: 0.82, 4: 0.81},
+            2: {10: 0.96, 9.5: 0.94, 9: 0.92, 8.5: 0.91, 8: 0.89, 7.5: 0.88, 7: 0.86, 6.5: 0.85, 6: 0.83, 5.5: 0.82, 5: 0.80, 4: 0.78},
+            3: {10: 0.92, 9.5: 0.91, 9: 0.89, 8.5: 0.88, 8: 0.86, 7.5: 0.85, 7: 0.84, 6.5: 0.82, 6: 0.80, 5.5: 0.79, 5: 0.78, 4: 0.76},
+            4: {10: 0.89, 9.5: 0.88, 9: 0.86, 8.5: 0.85, 8: 0.84, 7.5: 0.82, 7: 0.81, 6.5: 0.80, 6: 0.78, 5.5: 0.77, 5: 0.76, 4: 0.74},
+            5: {10: 0.86, 9.5: 0.85, 9: 0.84, 8.5: 0.82, 8: 0.81, 7.5: 0.80, 7: 0.79, 6.5: 0.77, 6: 0.75, 5.5: 0.74, 5: 0.73, 4: 0.72},
+            6: {10: 0.84, 9.5: 0.82, 9: 0.81, 8.5: 0.80, 8: 0.79, 7.5: 0.77, 7: 0.76, 6.5: 0.75, 6: 0.73, 5.5: 0.72, 5: 0.71, 4: 0.69},
+            7: {10: 0.81, 9.5: 0.80, 9: 0.79, 8.5: 0.77, 8: 0.76, 7.5: 0.75, 7: 0.74, 6.5: 0.72, 6: 0.70, 5.5: 0.69, 5: 0.68, 4: 0.67},
+            8: {10: 0.79, 9.5: 0.77, 9: 0.76, 8.5: 0.75, 8: 0.74, 7.5: 0.72, 7: 0.71, 6.5: 0.69, 6: 0.67, 5.5: 0.66, 5: 0.65, 4: 0.63},
+            9: {10: 0.76, 9.5: 0.75, 9: 0.74, 8.5: 0.72, 8: 0.71, 7.5: 0.69, 7: 0.68, 6.5: 0.67, 6: 0.65, 5.5: 0.64, 5: 0.62, 4: 0.61},
+            10: {10: 0.74, 9.5: 0.72, 9: 0.71, 8.5: 0.69, 8: 0.68, 7.5: 0.67, 7: 0.65, 6.5: 0.64, 6: 0.62, 5.5: 0.61, 5: 0.59, 4: 0.58},
+        };
+
+        function getPercentageFromTable(reps, rpe) {
+            if (rpeTable[reps] && rpeTable[reps][rpe]) {
+                return rpeTable[reps][rpe];
+            }
+            return 0; // Default return in case of incorrect input
+        }
+
+        function calculateE1RM(weight, reps, rpe) {
+            const percentage = getPercentageFromTable(reps, rpe);
+            return percentage ? (weight / percentage) : 0;
+        }
+
+        function calculateWantWeight(e1rm, wantReps, wantRPE) {
+            const percentage = getPercentageFromTable(wantReps, wantRPE);
+            return percentage ? (e1rm * percentage) : 0;
+        }
+
+        function updateCalculations() {
+            const weight = parseFloat(document.getElementById('weight').value) || 0;
+            const reps = parseInt(document.getElementById('reps').value) || 0;
+            const rpe = parseFloat(document.getElementById('rpe').value) || 0;
+
+            if (weight && reps && rpe) {
+                const e1rm = calculateE1RM(weight, reps, rpe);
+                document.getElementById('e1rm').value = e1rm.toFixed(1);
+
+                const wantReps = parseInt(document.getElementById('want-reps').value) || 0;
+                const wantRPE = parseFloat(document.getElementById('want-rpe').value) || 0;
+
+                if (wantReps && wantRPE) {
+                    const wantWeight = calculateWantWeight(e1rm, wantReps, wantRPE);
+                    document.getElementById('want-weight').value = wantWeight.toFixed(1);
+                }
+            }
+        }
+
+        // Add event listeners to all input fields
+        const inputs = document.querySelectorAll('input:not([readonly])');
+        inputs.forEach(input => {
+            input.addEventListener('input', updateCalculations);
+        });
+    </script>
+</body>
+</html>
